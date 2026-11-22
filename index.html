@@ -504,14 +504,13 @@ function stepTest(dt) {
   const T = S.test, tb = tubes[T.i];
   T.t += dt;
   const go = clamp01(T.t / 0.7), back = clamp01((T.t - 3.2) / 0.7);
-  const nz = NOZZLE(T.i), at = nz.clone().add(new THREE.Vector3(0.3, 1.6, 0.6));
+  const nz = NOZZLE(T.i), at = nz.clone().add(new THREE.Vector3(0.15, 0.45, 0.45));
   const p = REST.clone().lerp(at, ease(go)).lerp(REST, ease(back));
   const g = T.tool === 'match' ? matchG : incG;
-  g.position.copy(p); g.rotation.set(0, 0, 0.35 * (1 - back));
+  g.position.copy(p); g.rotation.set(0, 0, 2.62 * ease(go) * (1 - ease(back)));
   tb.cock.rotation.z = T.t > 0.7 && T.t < 3.2 ? Math.PI / 2 : 0;
   const tip = g.position.clone();
-  if (T.tool === 'match') { fire.position.copy(tip).add(new THREE.Vector3(0, 0.55, 0)); }
-  else fire.position.copy(tip).add(new THREE.Vector3(0, 0.3, 0));
+  fire.position.copy(tip).add(new THREE.Vector3(0, T.tool === 'match' ? 0.5 : 0.6, 0));
   if (!T.done && T.t > 0.9) {
     T.done = true; T.kind = tb.kind; tb.release = 1.6; tb.tested = tb.kind;
     const side = T.i === 0 ? '左' : '右';
@@ -525,15 +524,15 @@ function stepTest(dt) {
   let fOp = T.tool === 'match' ? 0.85 * (1 - back) : 0, fS = 1.1, fl = 0;
   ember.material.emissiveIntensity = T.tool === 'incense' ? 2.2 * (1 - back) : 0;
   if (k >= 0) {
-    if (T.tool === 'match' && T.kind === 'H2') fl = Math.max(0, 1 - k / 0.6);
+    if (T.tool === 'match' && T.kind === 'H2') fl = Math.max(0, 1 - k / 0.7);
     if (T.tool === 'match' && T.kind === 'O2') fS = 1.1 + 0.9 * Math.exp(-k * 0.8);
-    if (T.tool === 'incense' && T.kind === 'O2') { fOp = (1 - back) * Math.min(1, k * 4); fS = 2.6 + 0.25 * Math.sin(k * 30); }
+    if (T.tool === 'incense' && T.kind === 'O2') { fOp = (1 - back) * Math.min(1, k * 4); fS = 3.4 + 0.3 * Math.sin(k * 30); }
     if (T.tool === 'incense' && T.kind === 'H2') ember.material.emissiveIntensity *= Math.max(0.15, 1 - k);
   }
   fireMat.opacity = fOp; fire.scale.set(fS * 1.0, fS * 1.7, 1);
   fireMat.color.set(T.tool === 'incense' ? 0xffb050 : 0xffa040);
-  flashMat.opacity = fl; flash.position.copy(nz).add(new THREE.Vector3(0, 0.8, 0)); flash.scale.setScalar(2 + 6 * (1 - fl));
-  fireLight.position.copy(fire.position); fireLight.intensity = 60 * fOp * fS + 400 * fl;
+  flashMat.opacity = Math.min(1, fl * 1.3); flash.position.copy(nz).add(new THREE.Vector3(0, 0.9, 0.3)); flash.scale.setScalar(3.5 + 9 * (1 - fl));
+  fireLight.position.copy(fire.position); fireLight.intensity = 80 * fOp * fS + 900 * fl;
   if (T.t > 3.9) { S.test = null; g.position.copy(REST); fireMat.opacity = 0; flashMat.opacity = 0; fireLight.intensity = 0; ember.material.emissiveIntensity = 0; placeTools(); }
 }
 function placeTools() {
