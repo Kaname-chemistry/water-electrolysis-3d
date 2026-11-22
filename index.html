@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>水の電気分解 | Electrolysis Bench</title>
+<meta name="description" content="ホフマン型装置で水の電気分解を3D体験。陰極と陽極の気体が2：1でたまる様子、マッチで「ポン」、線香が炎を上げる確認まで。純粋な水では電流が流れない、活栓を開けたままだと気体がたまらない、などの失敗も試せます。">
+<meta property="og:title" content="Electrolysis Bench | 水の電気分解シミュレーション">
+<meta property="og:description" content="ホフマン型装置で水の電気分解を3D体験。陰極と陽極の気体が2：1でたまる様子、マッチで「ポン」、線香が炎を上げる確認まで。純粋な水では電流が流れない、活栓を開けたままだと気体がたまらない、などの失敗も試せます。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kaname-chemistry.github.io/water-electrolysis-3d/">
+<meta property="og:image" content="https://kaname-chemistry.github.io/water-electrolysis-3d/ogp.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Electrolysis Bench | 水の電気分解シミュレーション">
+<meta name="twitter:description" content="陰極と陽極の気体は2：1。マッチで「ポン」、線香が炎を上げる。純粋な水では流れない理由まで3Dで確かめよう。">
+<meta name="twitter:image" content="https://kaname-chemistry.github.io/water-electrolysis-3d/ogp.jpg">
+<link rel="icon" href="data:,">
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#c7cfd6;color:#132331;
+    font-family:system-ui,-apple-system,"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic UI",Meiryo,sans-serif;
+    -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+  #c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;outline:none}
+  .glass{position:fixed;background:rgba(244,248,252,.5);
+    -webkit-backdrop-filter:blur(16px) saturate(1.5);backdrop-filter:blur(16px) saturate(1.5);
+    border:1px solid rgba(255,255,255,.72);border-radius:16px;
+    box-shadow:0 10px 32px rgba(14,30,48,.2),inset 0 1px 0 rgba(255,255,255,.85)}
+  #hud{top:max(12px,env(safe-area-inset-top));right:12px;width:292px;padding:12px;box-sizing:border-box}
+  .cap{font-size:10.5px;letter-spacing:.07em;color:#56707f;font-weight:650}
+  .gas{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:4px 0 6px}
+  .gas>div{background:rgba(255,255,255,.45);border:1px solid rgba(20,50,70,.1);border-radius:10px;padding:6px 8px}
+  .gas .k{font-size:11px;font-weight:650;color:#30495a}
+  .gas .v{font-size:24px;font-weight:750;font-variant-numeric:tabular-nums;line-height:1.15}
+  .gas .v small,.rd .v small{font-size:12px;font-weight:600;color:#4c6474;margin-left:2px}
+  .gas .n{font-size:10.5px;color:#56707f}
+  #ratio{font-size:13px;font-weight:700;color:#203848;margin:2px 0 6px;font-variant-numeric:tabular-nums}
+  #ratio b{font-size:16px}
+  #eq{font-size:12.5px;font-weight:650;color:#203848;margin:0 0 8px}
+  #eq.lit{color:#c0561c}
+  .reads{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin:0 0 8px}
+  .rd .k{font-size:9.5px;color:#56707f;font-weight:650;letter-spacing:.04em}
+  .rd .v{font-size:16px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.2}
+  #log{list-style:none;margin:4px 0 0;padding:0;max-height:156px;overflow:hidden;font-size:12px}
+  #log li{display:flex;align-items:center;gap:7px;padding:4px 0;border-top:1px solid rgba(30,60,80,.1);line-height:1.35}
+  #log li i{width:9px;height:9px;border-radius:3px;flex:none;border:1px solid rgba(0,0,0,.2)}
+  #log li em{font-style:normal;margin-left:auto;font-size:10px;font-weight:700;color:#9a3b12;background:rgba(230,120,40,.16);
+    border:1px solid rgba(200,90,30,.35);padding:1px 5px;border-radius:5px;flex:none}
+  #log li.ok em{color:#1d6b3c;background:rgba(60,170,100,.14);border-color:rgba(40,140,80,.35)}
+  #log .empty{color:#6a8090}
+  #safe{margin-top:8px;font-size:10px;color:#5b7383;line-height:1.4}
+  #ctrl{left:50%;transform:translateX(-50%);bottom:max(12px,env(safe-area-inset-bottom));
+    width:min(720px,calc(100vw - 24px));box-sizing:border-box;padding:10px 12px}
+  .row{display:flex;gap:7px;align-items:center}
+  .row+.row{margin-top:8px}
+  .row>button{flex:1}
+  button{font:inherit;font-size:13px;font-weight:650;color:#14303f;background:rgba(255,255,255,.74);
+    border:1px solid rgba(20,50,70,.22);border-radius:10px;padding:8px 10px;cursor:pointer;transition:background .15s,transform .08s;white-space:nowrap}
+  button:hover{background:rgba(255,255,255,.96)} button:active{transform:scale(.97)}
+  button.primary{background:#1d6f8f;color:#fff;border-color:#165a74}
+  button.primary.lit{background:#b8482e;border-color:#963a24}
+  button.warn{background:#9a3b22;color:#fff;border-color:#7d2f1b}
+  .seg{display:flex;flex:1;border:1px solid rgba(20,50,70,.22);border-radius:10px;overflow:hidden}
+  .seg button{flex:1;border:0;border-radius:0;background:rgba(255,255,255,.5);font-weight:600;font-size:12.5px}
+  .seg button+button{border-left:1px solid rgba(20,50,70,.14)}
+  .seg button.on{background:#14303f;color:#fff}
+  .seg button.bad.on{background:#9a3b22}
+  .seg.tool{flex:0 0 auto}
+  .lbl{font-size:12px;font-weight:650;color:#30495a;white-space:nowrap}
+  input[type=range]{flex:1;min-width:80px;accent-color:#2d6d8a}
+  #vv{font-size:12.5px;font-weight:650;color:#30495a;min-width:44px;text-align:right;font-variant-numeric:tabular-nums}
+  #hint{position:fixed;left:12px;top:max(12px,env(safe-area-inset-top));font-size:11.5px;color:#36505f;
+    background:rgba(255,255,255,.42);padding:6px 9px;border-radius:9px;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+  #toast{position:fixed;left:50%;transform:translateX(-50%);bottom:214px;background:rgba(18,32,44,.86);color:#fff;font-size:13px;
+    padding:8px 13px;border-radius:10px;opacity:0;transition:opacity .25s;pointer-events:none;max-width:min(560px,calc(100vw - 40px));text-align:center;line-height:1.4}
+  #toast.warn{background:rgba(150,36,20,.92)}
+  #toast.pop{font-size:22px;font-weight:800;background:rgba(200,110,20,.92)}
+  @media (max-width:640px){
+    #hud{width:200px;padding:9px;right:8px;top:max(8px,env(safe-area-inset-top))}
+    .gas{gap:5px} .gas>div{padding:4px 6px} .gas .v{font-size:17px} .gas .k{font-size:10px} .gas .n{display:none}
+    #ratio{font-size:11.5px;margin-bottom:4px} #ratio b{font-size:13px} #eq,#hint,.rd.x{display:none}
+    .reads{grid-template-columns:1fr 1fr;gap:3px;margin-bottom:4px} .rd .v{font-size:13px} .cap{font-size:9px}
+    #log{max-height:38px;font-size:10.5px} #log li{padding:2px 0} #safe{font-size:9px;margin-top:4px}
+    #ctrl{padding:8px;bottom:max(8px,env(safe-area-inset-bottom))} .row+.row{margin-top:6px}
+    button{font-size:11.5px;padding:8px 4px} .seg button{font-size:11px;padding:8px 3px} .lbl{display:none}
+    #toast{bottom:230px;font-size:12px}
+  }
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hint">ドラッグで回転 · ホイール / ピンチで拡大</div>
+
+<div id="hud" class="glass">
+  <div class="cap">たまった気体の体積（25 °C・1気圧として計算）</div>
+  <div class="gas">
+    <div><div class="k" id="kL">左の管 · 陰極（−）</div><div class="v" id="vL">0.0<small>mL</small></div><div class="n" id="nL">まだ調べていない</div></div>
+    <div><div class="k" id="kR">右の管 · 陽極（＋）</div><div class="v" id="vR">0.0<small>mL</small></div><div class="n" id="nR">まだ調べていない</div></div>
+  </div>
+  <div id="ratio">陰極：陽極 ＝ <b>— : —</b></div>
+  <div id="eq">2H₂O → 2H₂ + O₂</div>
+  <div class="reads">
+    <div class="rd"><div class="k">電圧</div><div class="v" id="rV">9.0<small>V</small></div></div>
+    <div class="rd"><div class="k">電流</div><div class="v" id="rI">0.00<small>A</small></div></div>
+    <div class="rd x"><div class="k">経過（30倍速）</div><div class="v" id="rT">0:00</div></div>
+  </div>
+  <div class="cap">記録</div>
+  <ul id="log"><li class="empty">電源を入れて電流を流してみよう</li></ul>
+  <div id="safe">これはシミュレーションです。実際の実験は必ず先生の指導のもとで行ってください。</div>
+</div>
+
+<div id="ctrl" class="glass">
+  <div class="row">
+    <button id="bPow" class="primary">電源を入れる</button>
+    <button id="bCock">上の活栓：閉</button>
+    <button id="bRev">つなぎ方を逆にする</button>
+    <button id="bReset">やり直す</button>
+  </div>
+  <div class="row">
+    <span class="lbl">電圧</span><input id="volt" type="range" min="0" max="12" step="0.5" value="9"><span id="vv">9.0 V</span>
+  </div>
+  <div class="row">
+    <span class="lbl">液体</span>
+    <div class="seg" id="elec"><button data-e="naoh" class="on">水酸化ナトリウム水溶液</button><button data-e="water" class="bad">純粋な水</button></div>
+  </div>
+  <div class="row">
+    <div class="seg tool" id="tool"><button data-t="match" class="on">マッチ</button><button data-t="incense">線香</button></div>
+    <button id="bTestL">左の管を調べる</button>
+    <button id="bTestR">右の管を調べる</button>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+
+/* ================================================================
+   Chemistry / electricity constants  (2H2O -> 2H2 + O2)
+   cathode: 2H2O + 2e- -> H2 + 2OH-   anode: 4OH- -> O2 + 2H2O + 4e-
+   ================================================================ */
+const F = 96485;               // C/mol
+const VM = 24500;              // mL/mol at 25 °C, 1 atm
+const V_DEC = 1.8;             // practical decomposition voltage (1.23 V + overpotential)
+const R_OHM = { naoh: 20, water: 4000 };
+const SPEED = 30;              // lab seconds per real second
+const DISSOLVE = { H2: 0.25, O2: 0.5 };   // mL that dissolve in the liquid first (O2 dissolves a little more)
+const CAP = 30;                // graduated capacity of each side tube (mL)
+
+/* ================================================================
+   Renderer, scene, camera
+   ================================================================ */
+const srgb = (r, g, b) => new THREE.Color().setRGB(r, g, b, THREE.SRGBColorSpace);
+const isMobile = matchMedia('(pointer:coarse)').matches || Math.min(innerWidth, innerHeight) < 600;
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance', preserveDrawingBuffer: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, isMobile ? 1.75 : 2));
+renderer.setSize(innerWidth, innerHeight, false);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+const ANISO = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+
+const scene = new THREE.Scene();
+scene.background = srgb(0.79, 0.83, 0.86);
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+
+const camera = new THREE.PerspectiveCamera(38, innerWidth / innerHeight, 0.3, 500);
+scene.add(camera);
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true; controls.dampingFactor = 0.08;
+controls.minDistance = 8; controls.maxDistance = 150; controls.maxPolarAngle = 1.52; controls.minPolarAngle = 0.1;
+function frameCamera() {
+  const a = innerWidth / innerHeight;
+  const dist = a < 1 ? 66 : 62;
+  controls.target.set(a < 1 ? 4.5 : 5, a < 1 ? 12.5 : 11.5, 1);
+  camera.position.copy(controls.target).addScaledVector(new THREE.Vector3(0.08, 0.13, 0.99).normalize(), dist);
+  controls.update();
+}
+frameCamera();
+
+scene.add(new THREE.HemisphereLight(0xffffff, 0x7b838a, 0.95));
+const sun = new THREE.DirectionalLight(0xfff8ee, 2.2);
+sun.position.set(26, 70, 36); sun.target.position.set(2, 0, 0);
+sun.castShadow = true;
+sun.shadow.mapSize.set(isMobile ? 1024 : 2048, isMobile ? 1024 : 2048);
+Object.assign(sun.shadow.camera, { left: -40, right: 40, top: 45, bottom: -36, near: 20, far: 160 });
+sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.04; sun.shadow.radius = 4;
+scene.add(sun, sun.target);
+const fillL = new THREE.DirectionalLight(0xe6efff, 0.55); fillL.position.set(-36, 26, 24); scene.add(fillL);
+const fireLight = new THREE.PointLight(0xffa040, 0, 0, 2); scene.add(fireLight);
+
+/* ---------- helpers ---------- */
+const V2 = (x, y) => new THREE.Vector2(x, y);
+const JP = '"Hiragino Sans","Noto Sans JP","Yu Gothic UI",IPAPGothic,system-ui,sans-serif';
+function tex(w, h, draw, o = {}) {
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  draw(c.getContext('2d'), w, h);
+  const t = new THREE.CanvasTexture(c);
+  if (o.srgb !== false) t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = ANISO;
+  if (o.rep) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(o.rep[0], o.rep[1]); }
+  t.userData.canvas = c;
+  return t;
+}
+function add(geo, mat, o = {}) {
+  const m = new THREE.Mesh(geo, mat);
+  if (o.p) m.position.set(...o.p);
+  if (o.r) m.rotation.set(...o.r);
+  if (o.s) m.scale.set(...o.s);
+  m.castShadow = !!o.cast; m.receiveShadow = !!o.recv;
+  if (o.ro !== undefined) m.renderOrder = o.ro;
+  (o.to || scene).add(m);
+  return m;
+}
+function glass(o = {}) {
+  const m = new THREE.MeshPhysicalMaterial({ color: o.color ?? 0xffffff, roughness: 0.04, metalness: 0, ior: 1.5,
+    transparent: true, opacity: o.op ?? 0.12, depthWrite: false, side: THREE.DoubleSide, envMapIntensity: o.env ?? 1.6 });
+  const k = (o.edge ?? 0.5).toFixed(2);
+  m.onBeforeCompile = (sh) => {
+    sh.fragmentShader = sh.fragmentShader.replace('#include <opaque_fragment>',
+      `{ float e = 1.0 - abs(dot(normalize(normal), normalize(vViewPosition)));
+         e = e * e * e; diffuseColor.a = clamp(diffuseColor.a + e * ${k}, 0.0, 0.9); outgoingLight += vec3(e * 0.05); }
+       #include <opaque_fragment>`);
+  };
+  m.customProgramCacheKey = () => 'g' + k;
+  return m;
+}
+function drawLabel(g, w, h, text, sub, band) {
+  g.clearRect(0, 0, w, h);
+  g.fillStyle = '#fbfaf6'; g.fillRect(0, 0, w, h);
+  g.fillStyle = band; g.fillRect(0, 0, w, 14);
+  g.fillStyle = '#111a21'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.font = `800 ${Math.min(44, Math.floor(w * 1.1 / Math.max(3, text.length)))}px ${JP}`; g.fillText(text, w / 2, 60);
+  g.font = `500 19px ${JP}`; g.fillStyle = '#4b5e6b'; g.fillText(sub, w / 2, 104);
+}
+const label = (text, sub, w = 256, h = 128, band = '#3d5566') => tex(w, h, (g) => drawLabel(g, w, h, text, sub, band));
+const clamp01 = (x) => Math.max(0, Math.min(1, x));
+const ease = (t) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+/* ================================================================
+   Room
+   ================================================================ */
+const benchMap = tex(512, 512, (g, w, h) => {
+  g.fillStyle = '#3b4044'; g.fillRect(0, 0, w, h);
+  const im = g.getImageData(0, 0, w, h), d = im.data;
+  for (let i = 0; i < d.length; i += 4) { const n = (Math.random() - 0.5) * 16; d[i] += n; d[i + 1] += n; d[i + 2] += n; }
+  g.putImageData(im, 0, 0);
+}, { rep: [5, 2.5] });
+add(new THREE.BoxGeometry(140, 4, 60), new THREE.MeshStandardMaterial({ map: benchMap, roughness: 0.94, envMapIntensity: 0.45 }), { p: [4, -2, -4], recv: true });
+const wallMap = tex(512, 512, (g, w, h) => {
+  g.fillStyle = '#c1c9cf'; g.fillRect(0, 0, w, h);
+  for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) {
+    const v = 230 + ((i * 7 + j * 3) % 9); g.fillStyle = `rgb(${v - 3},${v + 1},${v + 4})`;
+    g.fillRect(i * 128 + 3, j * 128 + 3, 122, 122);
+  }
+}, { rep: [12, 6] });
+add(new THREE.PlaneGeometry(140, 70), new THREE.MeshStandardMaterial({ map: wallMap, roughness: 0.55, envMapIntensity: 0.6 }), { p: [4, 35, -34], recv: true });
+
+/* ================================================================
+   Hofmann apparatus
+   side tubes at x = ±TX, reservoir at x = 0, bottom connector at y = Y_BOT
+   ================================================================ */
+const chrome = new THREE.MeshStandardMaterial({ color: 0xd2d6da, metalness: 1, roughness: 0.22 });
+const castIron = new THREE.MeshStandardMaterial({ color: 0x2d3338, metalness: 0.4, roughness: 0.55 });
+const TX = 5, TR = 0.95, Y_BOT = 4.5, Y_TOP = 23.5, ML = 0.5;   // ML: height per mL
+const Y_ZERO = Y_TOP, Y_FULL = Y_TOP - CAP * ML;
+const glassMat = glass({ op: 0.13, edge: 0.6 });
+// stand
+add(new RoundedBoxGeometry(22, 0.9, 7, 2, 0.3), castIron, { p: [0, 0.45, -3.2], cast: true, recv: true });
+add(new THREE.CylinderGeometry(0.38, 0.38, 30, 16), chrome, { p: [0, 15, -4.6], cast: true });
+// dark backdrop so the clear liquid, bubbles and scale read clearly
+add(new RoundedBoxGeometry(24, 31, 0.6, 2, 0.25), new THREE.MeshStandardMaterial({ color: 0x0d1013, roughness: 1, envMapIntensity: 0.12 }), { p: [0, 15.6, -7.2], cast: true, recv: true });
+for (const x of [-9, 9]) add(new THREE.BoxGeometry(1.2, 1.2, 7), castIron, { p: [x, 0.6, -6.4], cast: true, recv: true });
+for (const y of [9.5, 20]) {
+  add(new RoundedBoxGeometry(1.5, 1.5, 1.5, 2, 0.25), castIron, { p: [0, y, -4.6], cast: true });
+  add(new THREE.CylinderGeometry(0.18, 0.18, TX * 2 + 1.6, 10), chrome, { p: [0, y, -2.2], r: [0, 0, Math.PI / 2], cast: true });
+  add(new THREE.CylinderGeometry(0.18, 0.18, 2.2, 10), chrome, { p: [0, y, -3.4], r: [Math.PI / 2, 0, 0] });
+  for (const sx of [-1, 1]) add(new THREE.TorusGeometry(TR + 0.12, 0.13, 8, 28), chrome, { p: [sx * TX, y, 0], r: [Math.PI / 2, 0, 0], cast: true });
+  for (const sx of [-1, 1]) add(new THREE.CylinderGeometry(0.14, 0.14, 1.2, 8), chrome, { p: [sx * TX, y, -1.4], r: [Math.PI / 2, 0, 0] });
+}
+// side tubes
+const tubes = [-1, 1].map((sx) => {
+  const g = new THREE.Group(); g.position.x = sx * TX; scene.add(g);
+  add(new THREE.CylinderGeometry(TR, TR, Y_TOP - Y_BOT + 2.4, 36, 1, true), glassMat, { p: [0, (Y_TOP + Y_BOT - 2.4) / 2, 0], to: g, ro: 6 });
+  // tapered top and stopcock
+  add(new THREE.CylinderGeometry(0.28, TR, 1.4, 36, 1, true), glassMat, { p: [0, Y_TOP + 0.7, 0], to: g, ro: 6 });
+  add(new THREE.CylinderGeometry(0.28, 0.28, 2.6, 16, 1, true), glassMat, { p: [0, Y_TOP + 2.7, 0], to: g, ro: 6 });
+  add(new THREE.SphereGeometry(0.62, 20, 14), glass({ op: 0.22, edge: 0.7 }), { p: [0, Y_TOP + 2.2, 0], to: g, ro: 6 });
+  const cock = new THREE.Group(); cock.position.set(0, Y_TOP + 2.2, 0); g.add(cock);
+  add(new THREE.CylinderGeometry(0.26, 0.26, 2.0, 12), glass({ op: 0.3, edge: 0.8 }), { r: [Math.PI / 2, 0, 0], to: cock, ro: 7 });
+  add(new RoundedBoxGeometry(0.35, 1.6, 0.35, 2, 0.1), glass({ op: 0.35, edge: 0.9 }), { p: [0, 0, 1.05], to: cock, ro: 7 });
+  // rubber stopper + electrode at the bottom
+  add(new THREE.CylinderGeometry(TR + 0.05, TR - 0.12, 1.6, 24), new THREE.MeshStandardMaterial({ color: 0x2b2d30, roughness: 0.75 }), { p: [0, Y_BOT - 2.4, 0], to: g, cast: true });
+  add(new THREE.CylinderGeometry(0.06, 0.06, 4.5, 8), chrome, { p: [0, Y_BOT - 0.3, 0], to: g });
+  add(new THREE.BoxGeometry(0.8, 2.2, 0.06), new THREE.MeshStandardMaterial({ color: 0xc9ccd0, metalness: 1, roughness: 0.3 }), { p: [0, Y_BOT + 2.4, 0], to: g, cast: true });
+  // liquid column
+  const liq = add(new THREE.CylinderGeometry(TR - 0.07, TR - 0.07, 1, 32), null, { to: g, ro: 3 });
+  const liqTop = add(new THREE.CircleGeometry(TR - 0.07, 32), null, { r: [-Math.PI / 2, 0, 0], to: g, ro: 3 });
+  const liqCone = add(new THREE.CylinderGeometry(0.22, TR - 0.07, 1.3, 32), null, { p: [0, Y_TOP + 0.65, 0], to: g, ro: 3 });
+  // graduation strip (0 mL at the top)
+  const gt = tex(128, 1024, (c, w, h) => {
+    c.clearRect(0, 0, w, h); c.fillStyle = 'rgba(255,255,255,.95)'; c.font = `700 30px ${JP}`; c.textBaseline = 'middle';
+    for (let m = 0; m <= CAP; m++) {
+      const y = 12 + (h - 24) * m / CAP, L = m % 5 === 0 ? 60 : m % 1 === 0 ? 34 : 20;
+      c.fillRect(0, y - 1.5, L, 3);
+      if (m % 5 === 0) c.fillText(String(m), 66, y);
+    }
+  });
+  const H = Y_ZERO - Y_FULL, pad = H * 12 / 1000;
+  add(new THREE.CylinderGeometry(TR + 0.02, TR + 0.02, H + 2 * pad, 24, 1, true, -0.45, 0.9), new THREE.MeshBasicMaterial({ map: gt, transparent: true, depthWrite: false, side: THREE.DoubleSide }),
+    { p: [0, (Y_ZERO + Y_FULL) / 2, 0], r: [0, sx < 0 ? 0.25 : -0.25, 0], to: g, ro: 8 });
+  return { g, sx, cock, liq, liqTop, liqCone, gas: 0, kind: null, tested: null, dissolved: 0, bAcc: 0, release: 0 };
+});
+// bottom connector + reservoir with bulb
+add(new THREE.CylinderGeometry(0.55, 0.55, TX * 2, 20, 1, true), glassMat, { p: [0, Y_BOT, 0], r: [0, 0, Math.PI / 2], ro: 6 });
+const BULB_Y = Y_TOP + 1.2, BULB_R = 2.5;
+add(new THREE.CylinderGeometry(0.6, 0.6, BULB_Y - BULB_R - Y_BOT + 0.4, 24, 1, true), glassMat, { p: [0, (BULB_Y - BULB_R + Y_BOT) / 2, 0], ro: 6 });
+add(new THREE.SphereGeometry(BULB_R, 32, 20), glassMat, { p: [0, BULB_Y, 0], ro: 6 });
+add(new THREE.CylinderGeometry(0.9, 0.7, 2.6, 24, 1, true), glassMat, { p: [0, BULB_Y + BULB_R + 1.0, 0], ro: 6 });
+
+/* ---------- liquid material and bulb liquid ---------- */
+const liqMat = new THREE.MeshStandardMaterial({ color: 0x8cc8e8, roughness: 0.12, transparent: true, opacity: 0.55, depthWrite: false, envMapIntensity: 1.3 });
+for (const t of tubes) { t.liq.material = liqMat; t.liqTop.material = liqMat; t.liqCone.material = liqMat; }
+const connLiq = add(new THREE.CylinderGeometry(0.47, 0.47, TX * 2, 16), liqMat, { p: [0, Y_BOT, 0], r: [0, 0, Math.PI / 2], ro: 3 });
+const resLiq = add(new THREE.CylinderGeometry(0.52, 0.52, 1, 16), liqMat, { ro: 3 });
+let bulbLiq = null, bulbLevel = -1;
+function setBulb(level) {
+  if (Math.abs(level - bulbLevel) < 0.01) return; bulbLevel = level;
+  const pts = [V2(0, -BULB_R + 0.1)], r = BULB_R - 0.12;
+  const yTop = Math.min(level - BULB_Y, r - 0.05);
+  for (let i = 0; i <= 16; i++) { const y = -r + (yTop + r) * i / 16; pts.push(V2(Math.sqrt(Math.max(0, r * r - y * y)), y)); }
+  pts.push(V2(0, yTop));
+  if (bulbLiq) { bulbLiq.geometry.dispose(); scene.remove(bulbLiq); }
+  bulbLiq = add(new THREE.LatheGeometry(pts, 32), liqMat, { p: [0, BULB_Y, 0], ro: 3 });
+}
+resLiq.scale.y = BULB_Y - BULB_R - Y_BOT; resLiq.position.y = (BULB_Y - BULB_R + Y_BOT) / 2;
+
+/* ================================================================
+   Power supply + lead wires + labels
+   ================================================================ */
+const PS = new THREE.Vector3(17, 0, 3);
+const ps = new THREE.Group(); ps.position.copy(PS); ps.rotation.y = -0.35; scene.add(ps);
+add(new RoundedBoxGeometry(9, 5.5, 6, 3, 0.5), new THREE.MeshStandardMaterial({ color: 0xe9ecef, roughness: 0.5 }), { p: [0, 2.75, 0], to: ps, cast: true, recv: true });
+const dispTex = tex(512, 160, () => {});
+const dispMesh = add(new THREE.PlaneGeometry(5.6, 1.75), new THREE.MeshBasicMaterial({ map: dispTex, toneMapped: false }), { p: [-0.6, 3.7, 3.01], to: ps });
+const led = add(new THREE.SphereGeometry(0.22, 12, 8), new THREE.MeshStandardMaterial({ color: 0x334, emissive: 0x000000 }), { p: [3.4, 4.3, 3.0], to: ps });
+const knob = add(new THREE.CylinderGeometry(0.6, 0.6, 0.5, 20), new THREE.MeshStandardMaterial({ color: 0x23282d, roughness: 0.5 }), { p: [3.0, 2.2, 3.1], r: [Math.PI / 2, 0, 0], to: ps });
+const TERM = { pos: new THREE.Vector3(-2.6, 1.3, 3.15), neg: new THREE.Vector3(-0.6, 1.3, 3.15) };
+add(new THREE.CylinderGeometry(0.4, 0.4, 0.6, 16), new THREE.MeshStandardMaterial({ color: 0xc0392b, roughness: 0.4 }), { p: [TERM.pos.x, TERM.pos.y, TERM.pos.z], r: [Math.PI / 2, 0, 0], to: ps });
+add(new THREE.CylinderGeometry(0.4, 0.4, 0.6, 16), new THREE.MeshStandardMaterial({ color: 0x1d1f22, roughness: 0.4 }), { p: [TERM.neg.x, TERM.neg.y, TERM.neg.z], r: [Math.PI / 2, 0, 0], to: ps });
+add(new THREE.PlaneGeometry(1.3, 0.7), new THREE.MeshBasicMaterial({ map: label('＋', '', 128, 64, '#c0392b'), toneMapped: false }), { p: [TERM.pos.x, 0.45, 3.02], to: ps });
+add(new THREE.PlaneGeometry(1.3, 0.7), new THREE.MeshBasicMaterial({ map: label('−', '', 128, 64, '#1d1f22'), toneMapped: false }), { p: [TERM.neg.x, 0.45, 3.02], to: ps });
+function drawDisplay(V, I, on) {
+  const c = dispTex.userData.canvas, g = c.getContext('2d'), w = c.width, h = c.height;
+  g.fillStyle = '#101a14'; g.fillRect(0, 0, w, h);
+  g.font = '700 84px ui-monospace,Menlo,monospace'; g.textBaseline = 'middle';
+  g.fillStyle = on ? '#7dff9a' : '#244a30';
+  g.textAlign = 'left'; g.fillText(`${V.toFixed(1)}V`, 18, h / 2 + 4);
+  g.fillStyle = on ? '#ffd166' : '#4a3d1e';
+  g.textAlign = 'right'; g.fillText(`${I.toFixed(2)}A`, w - 16, h / 2 + 4);
+  dispTex.needsUpdate = true;
+}
+const wireMat = { pos: new THREE.MeshStandardMaterial({ color: 0xc0392b, roughness: 0.5 }), neg: new THREE.MeshStandardMaterial({ color: 0x1d1f22, roughness: 0.5 }) };
+let wires = [];
+function rebuildWires(rev) {
+  for (const w of wires) { w.geometry.dispose(); scene.remove(w); }
+  wires = [];
+  ps.updateMatrixWorld();
+  for (const pol of ['neg', 'pos']) {
+    const a = ps.localToWorld(TERM[pol].clone().add(new THREE.Vector3(0, 0, 0.3)));
+    const left = (pol === 'neg') !== rev;
+    const ex = left ? -TX : TX, b = new THREE.Vector3(ex, Y_BOT - 4.3, 0.2);
+    const zOff = pol === 'neg' ? 2.6 : 3.6;
+    const curve = new THREE.CatmullRomCurve3([
+      a, a.clone().add(new THREE.Vector3(-0.6, -0.6, 1.2)), new THREE.Vector3(a.x - 4, 0.35, zOff + 2.4),
+      new THREE.Vector3(ex + (left ? 3 : 2), 0.35, zOff), new THREE.Vector3(ex, 0.4, 1.6), b
+    ]);
+    wires.push(add(new THREE.TubeGeometry(curve, 90, 0.2, 10), wireMat[pol], { cast: true, recv: true }));
+  }
+}
+// electrode labels on the bench, updated with polarity
+const elLab = [-1, 1].map((sx) => {
+  const t = label('陰極（−）', '', 256, 128); const m = add(new THREE.PlaneGeometry(3.6, 1.8), new THREE.MeshStandardMaterial({ map: t, roughness: 0.8 }), { p: [sx * TX, 0.95, 4.4], r: [-1.0, 0, 0], recv: true });
+  return { t, m };
+});
+function drawElLabels(rev) {
+  elLab.forEach((e, i) => {
+    const cath = (i === 0) !== rev, c = e.t.userData.canvas;
+    drawLabel(c.getContext('2d'), c.width, c.height, cath ? '陰極（−）' : '陽極（＋）', cath ? '電源の−極につなぐ' : '電源の＋極につなぐ', cath ? '#1d1f22' : '#c0392b');
+    e.t.needsUpdate = true;
+  });
+}
+
+/* ================================================================
+   Bubbles, test tools, effects
+   ================================================================ */
+const NB = 120;
+const bubMat = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.05, transparent: true, opacity: 0.6, envMapIntensity: 2.5, depthWrite: false });
+const bubbles = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 10, 8), bubMat, NB); bubbles.renderOrder = 5; bubbles.frustumCulled = false; scene.add(bubbles);
+const bub = Array.from({ length: NB }, () => ({ on: false, t: 0, x: 0, y: 0, z: 0, v: 0, r: 0, ph: 0 }));
+const dummy = new THREE.Object3D();
+// tools rest on the bench in front of the apparatus
+const toolG = new THREE.Group(); scene.add(toolG);
+const REST = new THREE.Vector3(-13, 1.0, 6);
+const matchG = new THREE.Group(); toolG.add(matchG);
+add(new THREE.BoxGeometry(0.22, 4.2, 0.22), new THREE.MeshStandardMaterial({ color: 0xe8d2a6, roughness: 0.8 }), { p: [0, -2.1, 0], to: matchG, cast: true });
+add(new THREE.SphereGeometry(0.24, 12, 8), new THREE.MeshStandardMaterial({ color: 0x8b2316, roughness: 0.7 }), { s: [1, 1.4, 1], to: matchG });
+const incG = new THREE.Group(); toolG.add(incG);
+add(new THREE.CylinderGeometry(0.11, 0.11, 6, 8), new THREE.MeshStandardMaterial({ color: 0x5d7a3a, roughness: 0.9 }), { p: [0, -3, 0], to: incG, cast: true });
+const ember = add(new THREE.SphereGeometry(0.15, 10, 8), new THREE.MeshStandardMaterial({ color: 0x331a10, emissive: 0xff4a10, emissiveIntensity: 0 }), { to: incG });
+const glowTex = tex(128, 128, (g, w, h) => {
+  const gr = g.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w / 2);
+  gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.25, 'rgba(255,255,255,.5)'); gr.addColorStop(0.6, 'rgba(255,255,255,.12)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, w, h);
+});
+const fireMat = new THREE.SpriteMaterial({ map: glowTex, color: 0xffa040, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false, opacity: 0 });
+const fire = new THREE.Sprite(fireMat); fire.renderOrder = 20; scene.add(fire);
+const flashMat = new THREE.SpriteMaterial({ map: glowTex, color: 0xfff1c0, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false, opacity: 0 });
+const flash = new THREE.Sprite(flashMat); flash.renderOrder = 21; scene.add(flash);
+let audio = null;
+function popSound() {
+  try {
+    audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+    const n = audio.sampleRate * 0.16, buf = audio.createBuffer(1, n, audio.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.exp(-i / (n * 0.12));
+    const src = audio.createBufferSource(), f = audio.createBiquadFilter(), gn = audio.createGain();
+    f.type = 'lowpass'; f.frequency.value = 1800; gn.gain.value = 0.9;
+    src.buffer = buf; src.connect(f).connect(gn).connect(audio.destination); src.start();
+  } catch (e) { /* audio is optional */ }
+}
+
+/* ================================================================
+   State
+   ================================================================ */
+function fresh() {
+  return { t: 0, simT: 0, onAt: 0, on: false, V: 9, I: 0, elec: 'naoh', rev: false, cock: false, tool: 'match', test: null, flags: {}, paused: false };
+}
+let S = fresh();
+const cathode = () => S.rev ? 1 : 0;
+const totalGas = () => tubes[0].gas + tubes[1].gas;
+
+/* ================================================================
+   Simulation
+   ================================================================ */
+function sim(dt) {
+  S.t += dt;
+  const I = S.on ? Math.max(0, (S.V - V_DEC) / R_OHM[S.elec]) : 0;
+  S.I = I;
+  const lab = dt * SPEED;
+  if (S.on) S.simT += lab;
+  const ne = I * lab / F;                                    // mol electrons this step
+  const prod = [0, 0]; prod[cathode()] = ne / 2 * VM; prod[1 - cathode()] = ne / 4 * VM;   // mL
+  tubes.forEach((tb, i) => {
+    const kind = i === cathode() ? 'H2' : 'O2';
+    let p = prod[i];
+    const dis = Math.min(Math.max(0, DISSOLVE[kind] - tb.dissolved), p * 0.6);
+    tb.dissolved += dis; p -= dis;
+    tb.rate = prod[i] / Math.max(dt, 1e-6);                   // mL per real second (for bubbles)
+    if (p > 0) {
+      if (S.cock) { tb.escaped = (tb.escaped || 0) + p; }
+      else { tb.gas = Math.min(CAP + 0.5, tb.gas + p); tb.kind = kind; }
+    }
+    if (tb.release > 0) { const r = Math.min(tb.gas, tb.gas * (1 - Math.exp(-dt * 3.5)) + dt * 0.4); tb.gas -= r; tb.release -= dt; if (tb.gas < 0.02) tb.gas = 0; }
+  });
+  // one-off log lines
+  if (S.on && !S.flags.noCurrent && S.elec === 'water' && S.t - S.onAt > 1.0) { S.flags.noCurrent = true; logPush('電流がほとんど流れない — 純粋な水にはイオンがほとんどなく、電気を通しにくい', '', '#9fb3c0'); toast('純粋な水では電流がほとんど流れない', true); }
+  if (S.on && !S.flags.lowV && S.elec === 'naoh' && S.V <= V_DEC && S.t - S.onAt > 1.0) { S.flags.lowV = true; logPush(`電圧が低すぎて、電気分解が起こらない（約${V_DEC} V 以下）`, '', '#9fb3c0'); }
+  if (S.on && S.cock && !S.flags.escape && (tubes[0].escaped || 0) > 0.6) { S.flags.escape = true; logPush('活栓が開いていて、気体がたまらずに逃げていく', '失敗', '#e8a87c'); toast('活栓が開いたまま — 気体が外に逃げてたまらない', true); }
+  if (!S.flags.bub && S.I > 0.05) { S.flags.bub = true; logPush('両方の電極から気体の泡が出てきた', '', '#dff0ff'); }
+  if (!S.flags.ratio && tubes[cathode()].gas > 10) { S.flags.ratio = true; logPush(`陰極側の気体が陽極側のおよそ2倍たまる（${ratioText()}）。ぴったり2にならないのは、酸素のほうが水に少し多く溶けるため`, '2:1', '#cfe6f2', 'ok'); }
+  if (S.on && tubes[cathode()].gas >= CAP) { setPower(false); toast('目盛りいっぱいになったので電源を切った'); }
+  // test animation
+  if (S.test) stepTest(dt);
+  hudDirty = true;
+}
+function ratioText() {
+  if (S.snap) return S.snap;
+  const h = tubes[cathode()].gas, o = tubes[1 - cathode()].gas;
+  return o > 0.5 ? `${(h / o).toFixed(2)} : 1` : '— : —';
+}
+
+/* ---------- gas test ---------- */
+const NOZZLE = (i) => new THREE.Vector3(tubes[i].sx * TX, Y_TOP + 4.2, 0);
+function startTest(i) {
+  if (S.test) return;
+  if (S.on) { toast('先に電源を切ってから調べよう'); return; }
+  const tb = tubes[i];
+  if (tb.gas < 2) { toast('気体がまだ少ない — もう少したまってから調べよう'); return; }
+  if (!S.snap) S.snap = ratioText();
+  S.test = { i, tool: S.tool, t: 0, done: false };
+  if (audio && audio.state === 'suspended') audio.resume();
+}
+function stepTest(dt) {
+  const T = S.test, tb = tubes[T.i];
+  T.t += dt;
+  const go = clamp01(T.t / 0.7), back = clamp01((T.t - 3.2) / 0.7);
+  const nz = NOZZLE(T.i), at = nz.clone().add(new THREE.Vector3(0.3, 1.6, 0.6));
+  const p = REST.clone().lerp(at, ease(go)).lerp(REST, ease(back));
+  const g = T.tool === 'match' ? matchG : incG;
+  g.position.copy(p); g.rotation.set(0, 0, 0.35 * (1 - back));
+  tb.cock.rotation.z = T.t > 0.7 && T.t < 3.2 ? Math.PI / 2 : 0;
+  const tip = g.position.clone();
+  if (T.tool === 'match') { fire.position.copy(tip).add(new THREE.Vector3(0, 0.55, 0)); }
+  else fire.position.copy(tip).add(new THREE.Vector3(0, 0.3, 0));
+  if (!T.done && T.t > 0.9) {
+    T.done = true; T.kind = tb.kind; tb.release = 1.6; tb.tested = tb.kind;
+    const side = T.i === 0 ? '左' : '右';
+    if (T.tool === 'match' && tb.kind === 'H2') { popSound(); toast('ポン！', false, 'pop'); logPush(`${side}の管：マッチの火を近づけると、ポンと音を立てて燃えた → 水素`, 'H₂', '#fff1c0', 'ok'); }
+    else if (T.tool === 'incense' && tb.kind === 'O2') { logPush(`${side}の管：火のついた線香が、炎を上げて激しく燃えた → 酸素`, 'O₂', '#ffb070', 'ok'); toast('線香が炎を上げて燃えた！'); }
+    else if (T.tool === 'match') { logPush(`${side}の管：マッチの炎が明るくなったが、ポンとは鳴らない → 水素ではない`, '', '#ffd9a0'); toast('ポンとは鳴らない…'); }
+    else { logPush(`${side}の管：線香を近づけても炎は上がらない → 酸素ではない`, '', '#c8b090'); toast('線香は燃え上がらない…'); }
+  }
+  // fire / flash visuals
+  const k = T.done ? T.t - 0.9 : -1;
+  let fOp = T.tool === 'match' ? 0.85 * (1 - back) : 0, fS = 1.1, fl = 0;
+  ember.material.emissiveIntensity = T.tool === 'incense' ? 2.2 * (1 - back) : 0;
+  if (k >= 0) {
+    if (T.tool === 'match' && T.kind === 'H2') fl = Math.max(0, 1 - k / 0.6);
+    if (T.tool === 'match' && T.kind === 'O2') fS = 1.1 + 0.9 * Math.exp(-k * 0.8);
+    if (T.tool === 'incense' && T.kind === 'O2') { fOp = (1 - back) * Math.min(1, k * 4); fS = 2.6 + 0.25 * Math.sin(k * 30); }
+    if (T.tool === 'incense' && T.kind === 'H2') ember.material.emissiveIntensity *= Math.max(0.15, 1 - k);
+  }
+  fireMat.opacity = fOp; fire.scale.set(fS * 1.0, fS * 1.7, 1);
+  fireMat.color.set(T.tool === 'incense' ? 0xffb050 : 0xffa040);
+  flashMat.opacity = fl; flash.position.copy(nz).add(new THREE.Vector3(0, 0.8, 0)); flash.scale.setScalar(2 + 6 * (1 - fl));
+  fireLight.position.copy(fire.position); fireLight.intensity = 60 * fOp * fS + 400 * fl;
+  if (T.t > 3.9) { S.test = null; g.position.copy(REST); fireMat.opacity = 0; flashMat.opacity = 0; fireLight.intensity = 0; ember.material.emissiveIntensity = 0; placeTools(); }
+}
+function placeTools() {
+  matchG.position.copy(REST).add(new THREE.Vector3(0, 0, 0)); matchG.rotation.set(0, 0, Math.PI / 2 - 0.1);
+  incG.position.copy(REST).add(new THREE.Vector3(1.2, 0, 1.2)); incG.rotation.set(0, 0.2, Math.PI / 2 - 0.05);
+  matchG.position.y = incG.position.y = 0.3;
+  matchG.position.x = REST.x + 2.2; incG.position.x = REST.x + 3.2;
+}
+
+/* ================================================================
+   Visuals every frame
+   ================================================================ */
+function visuals(dt) {
+  let levelSum = 0;
+  tubes.forEach((tb) => {
+    const lv = Y_ZERO - tb.gas * ML;
+    levelSum += tb.gas;
+    tb.liq.scale.y = lv - Y_BOT; tb.liq.position.y = (lv + Y_BOT) / 2;
+    tb.liqTop.position.y = lv;
+    tb.liqCone.visible = tb.gas < 0.02; tb.liqTop.visible = !tb.liqCone.visible;
+    if (!S.test || S.test.i !== tubes.indexOf(tb)) tb.cock.rotation.z = S.cock ? Math.PI / 2 : 0;
+  });
+  setBulb(BULB_Y - 1.4 + levelSum * 0.055);
+  // bubbles rise from each electrode plate to the liquid surface
+  let used = 0;
+  tubes.forEach((tb, i) => {
+    tb.bAcc += Math.min(40, tb.rate * (i === cathode() ? 1.6 : 2.2)) * dt;
+  });
+  for (const b of bub) {
+    if (b.on) {
+      b.y += b.v * dt; b.ph += dt * 8;
+      const lv = Y_ZERO - tubes[b.i].gas * ML;
+      if (b.y > lv - 0.05) b.on = false;
+    } else {
+      const i = tubes[0].bAcc >= 1 ? 0 : tubes[1].bAcc >= 1 ? 1 : -1;
+      if (i >= 0) {
+        tubes[i].bAcc -= 1;
+        const h2 = i === cathode();
+        b.on = true; b.i = i; b.x = (Math.random() - 0.5) * 0.7; b.z = (Math.random() - 0.5) * 0.5; b.y = Y_BOT + 1.4 + Math.random() * 2;
+        b.v = 4 + Math.random() * 3; b.r = h2 ? 0.06 + Math.random() * 0.06 : 0.08 + Math.random() * 0.08; b.ph = Math.random() * 6;
+      }
+    }
+    if (b.on) {
+      dummy.position.set(tubes[b.i].sx * TX + b.x + Math.sin(b.ph) * 0.08, b.y, b.z); dummy.scale.setScalar(b.r); dummy.updateMatrix();
+      bubbles.setMatrixAt(used++, dummy.matrix);
+    }
+  }
+  for (const tb of tubes) if (tb.bAcc > 4) tb.bAcc = 4;
+  bubbles.count = used; bubbles.instanceMatrix.needsUpdate = true;
+  led.material.emissive.set(S.on ? 0x22ff55 : 0x000000); led.material.emissiveIntensity = S.on ? 2 : 0;
+  knob.rotation.y = -S.V / 12 * 4.5;
+}
+
+/* ================================================================
+   HUD
+   ================================================================ */
+const $ = (id) => document.getElementById(id);
+let hudDirty = true, hudT = 0, dispKey = '';
+function updateHud() {
+  const c = cathode();
+  tubes.forEach((tb, i) => {
+    const side = i === 0 ? 'L' : 'R', cath = i === c;
+    $('k' + side).textContent = `${i === 0 ? '左' : '右'}の管 · ${cath ? '陰極（−）' : '陽極（＋）'}`;
+    $('v' + side).innerHTML = `${tb.gas.toFixed(1)}<small>mL</small>`;
+    $('n' + side).textContent = tb.tested === 'H2' ? '水素だった' : tb.tested === 'O2' ? '酸素だった' : 'まだ調べていない';
+  });
+  $('ratio').innerHTML = `陰極：陽極 ＝ <b>${ratioText()}</b>`;
+  $('eq').classList.toggle('lit', S.I > 0.05);
+  $('rV').innerHTML = `${S.V.toFixed(1)}<small>V</small>`;
+  $('rI').innerHTML = `${S.I.toFixed(S.I > 0 && S.I < 0.01 ? 3 : 2)}<small>A</small>`;
+  const m = Math.floor(S.simT / 60), s = Math.floor(S.simT % 60);
+  $('rT').textContent = `${m}:${String(s).padStart(2, '0')}`;
+  const key = `${S.V}|${S.I.toFixed(3)}|${S.on}`;
+  if (key !== dispKey) { dispKey = key; drawDisplay(S.on ? S.V : 0, S.I, S.on); }
+}
+const logEl = $('log'); const LOGMAX = 7;
+function logPush(text, tag = '', color = '#fff', cls = '') {
+  const e = logEl.querySelector('.empty'); if (e) e.remove();
+  const li = document.createElement('li'); if (cls) li.className = cls;
+  li.innerHTML = `<i style="background:${color}"></i><span>${text}</span>${tag ? `<em>${tag}</em>` : ''}`;
+  logEl.prepend(li); while (logEl.children.length > LOGMAX) logEl.lastChild.remove();
+}
+let tt; function toast(s, warn = false, cls = '') { const e = $('toast'); e.textContent = s; e.className = warn ? 'warn' : cls; e.style.opacity = 1; clearTimeout(tt); tt = setTimeout(() => e.style.opacity = 0, warn ? 3000 : 1800); }
+
+/* ================================================================
+   Controls
+   ================================================================ */
+function updateButtons() {
+  $('bPow').textContent = S.on ? '電源を切る' : '電源を入れる'; $('bPow').classList.toggle('lit', S.on);
+  $('bCock').textContent = S.cock ? '上の活栓：開' : '上の活栓：閉'; $('bCock').classList.toggle('warn', S.cock);
+  document.querySelectorAll('#elec button').forEach(b => b.classList.toggle('on', b.dataset.e === S.elec));
+  document.querySelectorAll('#tool button').forEach(b => b.classList.toggle('on', b.dataset.t === S.tool));
+  $('volt').value = S.V; $('vv').textContent = `${S.V.toFixed(1)} V`;
+}
+function setPower(on) {
+  if (on === S.on) return;
+  if (on && S.test) return;
+  S.on = on; S.onAt = S.t;
+  if (on) S.snap = null;
+  if (on) logPush(`電源を入れた（${S.V.toFixed(1)} V・${S.elec === 'naoh' ? '水酸化ナトリウム水溶液' : '純粋な水'}${S.rev ? '・逆につないだ' : ''}）`, '', '#7dff9a');
+  else logPush('電源を切った', '', '#8899aa');
+  updateButtons();
+}
+function setCock(open) {
+  if (S.test) return;
+  S.cock = open;
+  if (open && totalGas() > 0.1) { tubes.forEach(t => { t.release = 1.6; }); logPush('活栓を開けたので、たまっていた気体が出ていった', '', '#c8d0d6'); }
+  if (open) toast('上の活栓を開けた — このままだと気体がたまらない');
+  updateButtons();
+}
+function setRev(rev) {
+  if (S.on) { toast('電源を切ってから、つなぎ方を変えよう'); return; }
+  if (totalGas() > 0.1) { toast('管に気体が残っています —「やり直す」で空にしてから'); return; }
+  S.rev = rev; tubes.forEach(t => { t.dissolved = 0; });
+  rebuildWires(S.rev); drawElLabels(S.rev);
+  logPush(rev ? 'つなぎ方を逆にした：左が陽極（＋）、右が陰極（−）。水素はいつも陰極（−）側にたまる' : 'つなぎ方を元に戻した：左が陰極（−）、右が陽極（＋）', '', '#c0392b');
+  $('bRev').textContent = rev ? 'つなぎ方を元に戻す' : 'つなぎ方を逆にする';
+  hudDirty = true;
+}
+function setElec(e) { if (e in R_OHM) { S.elec = e; S.flags.noCurrent = false; if (S.on) S.onAt = S.t; logPush(e === 'naoh' ? '液体：水酸化ナトリウム水溶液（イオンが増えて電流が流れやすくなる）' : '液体：純粋な水', '', '#cfe6f2'); updateButtons(); } }
+function setVolt(v) { S.V = Math.max(0, Math.min(12, +v)); S.flags.lowV = false; if (S.on) S.onAt = S.t; updateButtons(); hudDirty = true; }
+function setTool(t) { if (t === 'match' || t === 'incense') { S.tool = t; updateButtons(); } }
+function reset() {
+  const keepV = S.V;
+  S = fresh(); S.V = keepV;
+  tubes.forEach(t => { t.gas = 0; t.kind = null; t.tested = null; t.dissolved = 0; t.release = 0; t.escaped = 0; t.bAcc = 0; t.rate = 0; t.cock.rotation.z = 0; });
+  bub.forEach(b => b.on = false);
+  fireMat.opacity = 0; flashMat.opacity = 0; fireLight.intensity = 0; ember.material.emissiveIntensity = 0;
+  placeTools(); rebuildWires(false); drawElLabels(false); $('bRev').textContent = 'つなぎ方を逆にする';
+  logEl.innerHTML = '<li class="empty">電源を入れて電流を流してみよう</li>';
+  updateButtons(); hudDirty = true;
+}
+$('bPow').addEventListener('click', () => setPower(!S.on));
+$('bCock').addEventListener('click', () => setCock(!S.cock));
+$('bRev').addEventListener('click', () => setRev(!S.rev));
+$('bReset').addEventListener('click', reset);
+$('volt').addEventListener('input', (e) => setVolt(e.target.value));
+document.querySelectorAll('#elec button').forEach(b => b.addEventListener('click', () => setElec(b.dataset.e)));
+document.querySelectorAll('#tool button').forEach(b => b.addEventListener('click', () => setTool(b.dataset.t)));
+$('bTestL').addEventListener('click', () => startTest(0));
+$('bTestR').addEventListener('click', () => startTest(1));
+
+function onResize() {
+  camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight, false); hudDirty = true;
+}
+addEventListener('resize', onResize);
+
+/* ================================================================
+   Loop
+   ================================================================ */
+reset(); onResize();
+const clock = new THREE.Clock();
+function frame() {
+  const dt = Math.min(clock.getDelta(), 1 / 20);
+  if (!S.paused) { sim(dt); visuals(dt); }
+  controls.update();
+  hudT += dt;
+  if (hudDirty && hudT > 1 / 15) { hudT = 0; hudDirty = false; updateHud(); }
+  renderer.render(scene, camera);
+}
+renderer.setAnimationLoop(frame);
+
+// hook for automated checks; has no effect on normal use
+window.__elec = {
+  get S() { return S; }, tubes, F, VM, V_DEC, R_OHM, SPEED, cathode, ratioText,
+  setPower, setCock, setRev, setElec, setVolt, setTool, startTest, reset,
+  click(id) { document.getElementById(id).click(); },
+  step(sec, h = 1 / 60) { for (let t = 0; t < sec; t += h) { sim(h); visuals(h); } updateHud(); renderer.render(scene, camera); },
+  hold(on) { renderer.setAnimationLoop(on ? null : frame); if (on) { controls.update(); updateHud(); renderer.render(scene, camera); } },
+  view(t, p) { controls.target.set(...t); camera.position.set(...p); controls.update(); }
+};
+</script>
+</body>
+</html>
